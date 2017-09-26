@@ -1,16 +1,14 @@
-#!/usr/bin/python3
+#!/usr/bin/python2.4
+
+from __future__ import division
 
 """Diff Match and Patch
-
 Copyright 2006 Google Inc.
 http://code.google.com/p/google-diff-match-patch/
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
   http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +17,6 @@ limitations under the License.
 """
 
 """Functions for diff, match and patch.
-
 Computes the difference between two texts to create a patch.
 Applies the patch onto another text, allowing for errors.
 """
@@ -30,11 +27,10 @@ import math
 import re
 import sys
 import time
-import urllib.parse
+import urllib
 
 class diff_match_patch:
   """Class containing the diff, match and patch methods.
-
   Also contains the behaviour settings.
   """
 
@@ -44,7 +40,7 @@ class diff_match_patch:
     """
 
     # Number of seconds to map a diff before giving up (0 for infinity).
-    self.Diff_Timeout = 3.0
+    self.Diff_Timeout = 1.0
     # Cost of an empty edit operation in terms of edit characters.
     self.Diff_EditCost = 4
     # At what point is no match declared (0.0 = perfection, 1.0 = very loose).
@@ -79,7 +75,6 @@ class diff_match_patch:
   def diff_main(self, text1, text2, checklines=True, deadline=None):
     """Find the differences between two texts.  Simplifies the problem by
       stripping any common prefix or suffix off the texts before diffing.
-
     Args:
       text1: Old string to be diffed.
       text2: New string to be diffed.
@@ -88,7 +83,6 @@ class diff_match_patch:
         Defaults to true, which does a faster, slightly less optimal diff.
       deadline: Optional time when the diff should be complete by.  Used
         internally for recursive calls.  Users should set DiffTimeout instead.
-
     Returns:
       Array of changes.
     """
@@ -96,7 +90,7 @@ class diff_match_patch:
     if deadline == None:
       # Unlike in most languages, Python counts time in seconds.
       if self.Diff_Timeout <= 0:
-        deadline = sys.maxsize
+        deadline = sys.maxint
       else:
         deadline = time.time() + self.Diff_Timeout
 
@@ -139,7 +133,6 @@ class diff_match_patch:
   def diff_compute(self, text1, text2, checklines, deadline):
     """Find the differences between two texts.  Assumes that the texts do not
       have any common prefix or suffix.
-
     Args:
       text1: Old string to be diffed.
       text2: New string to be diffed.
@@ -147,7 +140,6 @@ class diff_match_patch:
         first to identify the changed areas.
         If true, then run a faster, slightly less optimal diff.
       deadline: Time when the diff should be complete by.
-
     Returns:
       Array of changes.
     """
@@ -199,12 +191,10 @@ class diff_match_patch:
     """Do a quick line-level diff on both strings, then rediff the parts for
       greater accuracy.
       This speedup can produce non-minimal diffs.
-
     Args:
       text1: Old string to be diffed.
       text2: New string to be diffed.
       deadline: Time when the diff should be complete by.
-
     Returns:
       Array of changes.
     """
@@ -256,12 +246,10 @@ class diff_match_patch:
     """Find the 'middle snake' of a diff, split the problem in two
       and return the recursively constructed diff.
       See Myers 1986 paper: An O(ND) Difference Algorithm and Its Variations.
-
     Args:
       text1: Old string to be diffed.
       text2: New string to be diffed.
       deadline: Time at which to bail if not yet complete.
-
     Returns:
       Array of diff tuples.
     """
@@ -285,13 +273,13 @@ class diff_match_patch:
     k1end = 0
     k2start = 0
     k2end = 0
-    for d in range(max_d):
+    for d in xrange(max_d):
       # Bail out if deadline is reached.
       if time.time() > deadline:
         break
 
       # Walk the front path one step.
-      for k1 in range(-d + k1start, d + 1 - k1end, 2):
+      for k1 in xrange(-d + k1start, d + 1 - k1end, 2):
         k1_offset = v_offset + k1
         if k1 == -d or (k1 != d and
             v1[k1_offset - 1] < v1[k1_offset + 1]):
@@ -320,7 +308,7 @@ class diff_match_patch:
               return self.diff_bisectSplit(text1, text2, x1, y1, deadline)
 
       # Walk the reverse path one step.
-      for k2 in range(-d + k2start, d + 1 - k2end, 2):
+      for k2 in xrange(-d + k2start, d + 1 - k2end, 2):
         k2_offset = v_offset + k2
         if k2 == -d or (k2 != d and
             v2[k2_offset - 1] < v2[k2_offset + 1]):
@@ -357,14 +345,12 @@ class diff_match_patch:
   def diff_bisectSplit(self, text1, text2, x, y, deadline):
     """Given the location of the 'middle snake', split the diff in two parts
     and recurse.
-
     Args:
       text1: Old string to be diffed.
       text2: New string to be diffed.
       x: Index of split point in text1.
       y: Index of split point in text2.
       deadline: Time at which to bail if not yet complete.
-
     Returns:
       Array of diff tuples.
     """
@@ -382,11 +368,9 @@ class diff_match_patch:
   def diff_linesToChars(self, text1, text2):
     """Split two texts into an array of strings.  Reduce the texts to a string
     of hashes where each Unicode character represents one line.
-
     Args:
       text1: First string.
       text2: Second string.
-
     Returns:
       Three element tuple, containing the encoded text1, the encoded text2 and
       the array of unique strings.  The zeroth element of the array of unique
@@ -403,10 +387,8 @@ class diff_match_patch:
       """Split a text into an array of strings.  Reduce the texts to a string
       of hashes where each Unicode character represents one line.
       Modifies linearray and linehash through being a closure.
-
       Args:
         text: String to encode.
-
       Returns:
         Encoded string.
       """
@@ -424,11 +406,11 @@ class diff_match_patch:
         lineStart = lineEnd + 1
 
         if line in lineHash:
-          chars.append(chr(lineHash[line]))
+          chars.append(unichr(lineHash[line]))
         else:
           lineArray.append(line)
           lineHash[line] = len(lineArray) - 1
-          chars.append(chr(len(lineArray) - 1))
+          chars.append(unichr(len(lineArray) - 1))
       return "".join(chars)
 
     chars1 = diff_linesToCharsMunge(text1)
@@ -438,12 +420,11 @@ class diff_match_patch:
   def diff_charsToLines(self, diffs, lineArray):
     """Rehydrate the text in a diff from a string of line hashes to real lines
     of text.
-
     Args:
       diffs: Array of diff tuples.
       lineArray: Array of unique strings.
     """
-    for x in range(len(diffs)):
+    for x in xrange(len(diffs)):
       text = []
       for char in diffs[x][1]:
         text.append(lineArray[ord(char)])
@@ -451,11 +432,9 @@ class diff_match_patch:
 
   def diff_commonPrefix(self, text1, text2):
     """Determine the common prefix of two strings.
-
     Args:
       text1: First string.
       text2: Second string.
-
     Returns:
       The number of characters common to the start of each string.
     """
@@ -479,11 +458,9 @@ class diff_match_patch:
 
   def diff_commonSuffix(self, text1, text2):
     """Determine the common suffix of two strings.
-
     Args:
       text1: First string.
       text2: Second string.
-
     Returns:
       The number of characters common to the end of each string.
     """
@@ -508,11 +485,9 @@ class diff_match_patch:
 
   def diff_commonOverlap(self, text1, text2):
     """Determine if the suffix of one string is the prefix of another.
-
     Args:
       text1 First string.
       text2 Second string.
-
     Returns:
       The number of characters common to the end of the first
       string and the start of the second string.
@@ -552,11 +527,9 @@ class diff_match_patch:
     """Do the two texts share a substring which is at least half the length of
     the longer text?
     This speedup can produce non-minimal diffs.
-
     Args:
       text1: First string.
       text2: Second string.
-
     Returns:
       Five element Array, containing the prefix of text1, the suffix of text1,
       the prefix of text2, the suffix of text2 and the common middle.  Or None
@@ -576,12 +549,10 @@ class diff_match_patch:
       """Does a substring of shorttext exist within longtext such that the
       substring is at least half the length of longtext?
       Closure, but does not reference any external variables.
-
       Args:
         longtext: Longer string.
         shorttext: Shorter string.
         i: Start index of quarter length substring within longtext.
-
       Returns:
         Five element Array, containing the prefix of longtext, the suffix of
         longtext, the prefix of shorttext, the suffix of shorttext and the
@@ -635,7 +606,6 @@ class diff_match_patch:
   def diff_cleanupSemantic(self, diffs):
     """Reduce the number of edits by eliminating semantically trivial
     equalities.
-
     Args:
       diffs: Array of diff tuples.
     """
@@ -731,7 +701,6 @@ class diff_match_patch:
     """Look for single edits surrounded on both sides by equalities
     which can be shifted sideways to align the edit to a word boundary.
     e.g: The c<ins>at c</ins>ame. -> The <ins>cat </ins>came.
-
     Args:
       diffs: Array of diff tuples.
     """
@@ -741,11 +710,9 @@ class diff_match_patch:
       internal boundary falls on logical boundaries.
       Scores range from 6 (best) to 0 (worst).
       Closure, but does not reference any external variables.
-
       Args:
         one: First string.
         two: Second string.
-
       Returns:
         The score.
       """
@@ -845,7 +812,6 @@ class diff_match_patch:
   def diff_cleanupEfficiency(self, diffs):
     """Reduce the number of edits by eliminating operationally trivial
     equalities.
-
     Args:
       diffs: Array of diff tuples.
     """
@@ -916,7 +882,6 @@ class diff_match_patch:
   def diff_cleanupMerge(self, diffs):
     """Reorder and merge like edit sections.  Merge equalities.
     Any edit section can move as long as it doesn't cross an equality.
-
     Args:
       diffs: Array of diff tuples.
     """
@@ -1027,11 +992,9 @@ class diff_match_patch:
   def diff_xIndex(self, diffs, loc):
     """loc is a location in text1, compute and return the equivalent location
     in text2.  e.g. "The cat" vs "The big cat", 1->1, 5->8
-
     Args:
       diffs: Array of diff tuples.
       loc: Location within text1.
-
     Returns:
       Location within text2.
     """
@@ -1039,7 +1002,7 @@ class diff_match_patch:
     chars2 = 0
     last_chars1 = 0
     last_chars2 = 0
-    for x in range(len(diffs)):
+    for x in xrange(len(diffs)):
       (op, text) = diffs[x]
       if op != self.DIFF_INSERT:  # Equality or deletion.
         chars1 += len(text)
@@ -1058,10 +1021,8 @@ class diff_match_patch:
 
   def diff_prettyHtml(self, diffs):
     """Convert a diff array into a pretty HTML report.
-
     Args:
       diffs: Array of diff tuples.
-
     Returns:
       HTML representation.
     """
@@ -1079,10 +1040,8 @@ class diff_match_patch:
 
   def diff_text1(self, diffs):
     """Compute and return the source text (all equalities and deletions).
-
     Args:
       diffs: Array of diff tuples.
-
     Returns:
       Source text.
     """
@@ -1094,10 +1053,8 @@ class diff_match_patch:
 
   def diff_text2(self, diffs):
     """Compute and return the destination text (all equalities and insertions).
-
     Args:
       diffs: Array of diff tuples.
-
     Returns:
       Destination text.
     """
@@ -1110,10 +1067,8 @@ class diff_match_patch:
   def diff_levenshtein(self, diffs):
     """Compute the Levenshtein distance; the number of inserted, deleted or
     substituted characters.
-
     Args:
       diffs: Array of diff tuples.
-
     Returns:
       Number of changes.
     """
@@ -1138,10 +1093,8 @@ class diff_match_patch:
     required to transform text1 into text2.
     E.g. =3\t-2\t+ing  -> Keep 3 chars, delete 2 chars, insert 'ing'.
     Operations are tab-separated.  Inserted text is escaped using %xx notation.
-
     Args:
       diffs: Array of diff tuples.
-
     Returns:
       Delta text.
     """
@@ -1150,7 +1103,7 @@ class diff_match_patch:
       if op == self.DIFF_INSERT:
         # High ascii will raise UnicodeDecodeError.  Use Unicode instead.
         data = data.encode("utf-8")
-        text.append("+" + urllib.parse.quote(data, "!~*'();/?:@&=+$,# "))
+        text.append("+" + urllib.quote(data, "!~*'();/?:@&=+$,# "))
       elif op == self.DIFF_DELETE:
         text.append("-%d" % len(data))
       elif op == self.DIFF_EQUAL:
@@ -1160,17 +1113,18 @@ class diff_match_patch:
   def diff_fromDelta(self, text1, delta):
     """Given the original text1, and an encoded string which describes the
     operations required to transform text1 into text2, compute the full diff.
-
     Args:
       text1: Source string for the diff.
       delta: Delta text.
-
     Returns:
       Array of diff tuples.
-
     Raises:
       ValueError: If invalid input.
     """
+    if type(delta) == unicode:
+      # Deltas should be composed of a subset of ascii chars, Unicode not
+      # required.  If this encode raises UnicodeEncodeError, delta is invalid.
+      delta = delta.encode("ascii")
     diffs = []
     pointer = 0  # Cursor in text1
     tokens = delta.split("\t")
@@ -1182,7 +1136,7 @@ class diff_match_patch:
       # operation of this token (delete, insert, equality).
       param = token[1:]
       if token[0] == "+":
-        param = urllib.parse.unquote(param)
+        param = urllib.unquote(param).decode("utf-8")
         diffs.append((self.DIFF_INSERT, param))
       elif token[0] == "-" or token[0] == "=":
         try:
@@ -1211,12 +1165,10 @@ class diff_match_patch:
 
   def match_main(self, text, pattern, loc):
     """Locate the best instance of 'pattern' in 'text' near 'loc'.
-
     Args:
       text: The text to search.
       pattern: The pattern to search for.
       loc: The location to search around.
-
     Returns:
       Best match index or -1.
     """
@@ -1242,12 +1194,10 @@ class diff_match_patch:
   def match_bitap(self, text, pattern, loc):
     """Locate the best instance of 'pattern' in 'text' near 'loc' using the
     Bitap algorithm.
-
     Args:
       text: The text to search.
       pattern: The pattern to search for.
       loc: The location to search around.
-
     Returns:
       Best match index or -1.
     """
@@ -1261,11 +1211,9 @@ class diff_match_patch:
     def match_bitapScore(e, x):
       """Compute and return the score for a match with e errors and x location.
       Accesses loc and pattern through being a closure.
-
       Args:
         e: Number of errors in match.
         x: Location of match.
-
       Returns:
         Overall score for match (0.0 = good, 1.0 = bad).
       """
@@ -1294,7 +1242,7 @@ class diff_match_patch:
     bin_max = len(pattern) + len(text)
     # Empty initialization added to appease pychecker.
     last_rd = None
-    for d in range(len(pattern)):
+    for d in xrange(len(pattern)):
       # Scan for the best match each iteration allows for one more error.
       # Run a binary search to determine how far from 'loc' we can stray at
       # this error level.
@@ -1314,7 +1262,7 @@ class diff_match_patch:
 
       rd = [0] * (finish + 2)
       rd[finish + 1] = (1 << d) - 1
-      for j in range(finish, start - 1, -1):
+      for j in xrange(finish, start - 1, -1):
         if len(text) <= j - 1:
           # Out of range.
           charMatch = 0
@@ -1347,17 +1295,15 @@ class diff_match_patch:
 
   def match_alphabet(self, pattern):
     """Initialise the alphabet for the Bitap algorithm.
-
     Args:
       pattern: The text to encode.
-
     Returns:
       Hash of character locations.
     """
     s = {}
     for char in pattern:
       s[char] = 0
-    for i in range(len(pattern)):
+    for i in xrange(len(pattern)):
       s[pattern[i]] |= 1 << (len(pattern) - i - 1)
     return s
 
@@ -1366,7 +1312,6 @@ class diff_match_patch:
   def patch_addContext(self, patch, text):
     """Increase the context until it is unique,
     but don't let the pattern expand beyond Match_MaxBits.
-
     Args:
       patch: The patch to grow.
       text: Source text.
@@ -1417,7 +1362,6 @@ class diff_match_patch:
     a = text1, b = diffs
     Method 4 (deprecated, use method 3):
     a = text1, b = text2, c = diffs
-
     Args:
       a: text1 (methods 1,3,4) or Array of diff tuples for text1 to
           text2 (method 2).
@@ -1425,13 +1369,13 @@ class diff_match_patch:
           text2 (method 3) or undefined (method 2).
       c: Array of diff tuples for text1 to text2 (method 4) or
           undefined (methods 1,2,3).
-
     Returns:
       Array of Patch objects.
     """
     text1 = None
     diffs = None
-    if isinstance(a, str) and isinstance(b, str) and c is None:
+    # Note that texts may arrive as 'str' or 'unicode'.
+    if isinstance(a, basestring) and isinstance(b, basestring) and c is None:
       # Method 1: text1, text2
       # Compute diffs from text1 and text2.
       text1 = a
@@ -1444,11 +1388,11 @@ class diff_match_patch:
       # Compute text1 from diffs.
       diffs = a
       text1 = self.diff_text1(diffs)
-    elif isinstance(a, str) and isinstance(b, list) and c is None:
+    elif isinstance(a, basestring) and isinstance(b, list) and c is None:
       # Method 3: text1, diffs
       text1 = a
       diffs = b
-    elif (isinstance(a, str) and isinstance(b, str) and
+    elif (isinstance(a, basestring) and isinstance(b, basestring) and
           isinstance(c, list)):
       # Method 4: text1, text2, diffs
       # text2 is not used.
@@ -1465,7 +1409,7 @@ class diff_match_patch:
     char_count2 = 0  # Number of characters into the text2 string.
     prepatch_text = text1  # Recreate the patches to determine context info.
     postpatch_text = text1
-    for x in range(len(diffs)):
+    for x in xrange(len(diffs)):
       (diff_type, diff_text) = diffs[x]
       if len(patch.diffs) == 0 and diff_type != self.DIFF_EQUAL:
         # A new patch starts here.
@@ -1519,10 +1463,8 @@ class diff_match_patch:
 
   def patch_deepCopy(self, patches):
     """Given an array of patches, return another array that is identical.
-
     Args:
       patches: Array of Patch objects.
-
     Returns:
       Array of Patch objects.
     """
@@ -1541,11 +1483,9 @@ class diff_match_patch:
   def patch_apply(self, patches, text):
     """Merge a set of patches onto the text.  Return a patched text, as well
     as a list of true/false values indicating which patches were applied.
-
     Args:
       patches: Array of Patch objects.
       text: Old text.
-
     Returns:
       Two element Array, containing the new text and an array of boolean values.
     """
@@ -1629,16 +1569,14 @@ class diff_match_patch:
   def patch_addPadding(self, patches):
     """Add some padding on text start and end so that edges can match
     something.  Intended to be called only from within patch_apply.
-
     Args:
       patches: Array of Patch objects.
-
     Returns:
       The padding string added to each side.
     """
     paddingLength = self.Patch_Margin
     nullPadding = ""
-    for x in range(1, paddingLength + 1):
+    for x in xrange(1, paddingLength + 1):
       nullPadding += chr(x)
 
     # Bump all the patches forward.
@@ -1688,7 +1626,6 @@ class diff_match_patch:
     """Look through the patches and break up any which are longer than the
     maximum limit of the match algorithm.
     Intended to be called only from within patch_apply.
-
     Args:
       patches: Array of Patch objects.
     """
@@ -1697,7 +1634,7 @@ class diff_match_patch:
       # Python has the option of not splitting strings due to its ability
       # to handle integers of arbitrary precision.
       return
-    for x in range(len(patches)):
+    for x in xrange(len(patches)):
       if patches[x].length1 <= patch_size:
         continue
       bigpatch = patches[x]
@@ -1774,10 +1711,8 @@ class diff_match_patch:
 
   def patch_toText(self, patches):
     """Take a list of patches and return a textual representation.
-
     Args:
       patches: Array of Patch objects.
-
     Returns:
       Text representation of patches.
     """
@@ -1789,16 +1724,17 @@ class diff_match_patch:
   def patch_fromText(self, textline):
     """Parse a textual representation of patches and return a list of patch
     objects.
-
     Args:
       textline: Text representation of patches.
-
     Returns:
       Array of Patch objects.
-
     Raises:
       ValueError: If invalid input.
     """
+    if type(textline) == unicode:
+      # Patches should be composed of a subset of ascii chars, Unicode not
+      # required.  If this encode raises UnicodeEncodeError, patch is invalid.
+      textline = textline.encode("ascii")
     patches = []
     if not textline:
       return patches
@@ -1836,7 +1772,8 @@ class diff_match_patch:
           sign = text[0][0]
         else:
           sign = ''
-        line = urllib.parse.unquote(text[0][1:])
+        line = urllib.unquote(text[0][1:])
+        line = line.decode("utf-8")
         if sign == '+':
           # Insertion.
           patch.diffs.append((self.DIFF_INSERT, line))
@@ -1876,7 +1813,6 @@ class patch_obj:
     """Emmulate GNU diff's format.
     Header: @@ -382,8 +481,9 @@
     Indicies are printed as 1-based, not 0-based.
-
     Returns:
       The GNU diff string.
     """
@@ -1903,5 +1839,5 @@ class patch_obj:
         text.append(" ")
       # High ascii will raise UnicodeDecodeError.  Use Unicode instead.
       data = data.encode("utf-8")
-      text.append(urllib.parse.quote(data, "!~*'();/?:@&=+$,# ") + "\n")
+      text.append(urllib.quote(data, "!~*'();/?:@&=+$,# ") + "\n")
     return "".join(text)
