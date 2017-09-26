@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 import editdistance
 import diff_match_patch as dmp_module
