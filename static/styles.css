@@ -1,0 +1,45 @@
+html, body { min-height:100% }
+
+.container[role=main] {
+	min-height: 600px;
+}
+
+.flashmessages {
+	display:block;
+	padding: 0.2em 0.5em;
+}
+
+.flashmessages li {
+	list-style: none;
+	margin-left:0;
+	padding-left:0;
+}
+
+
+#results {
+	margin-top:1.8em;
+}
+
+
+@font-face {
+	font-family: 'Roboto Condensed';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Roboto Condensed'), local('RobotoCondensed-Regular'),
+	url('./roboto-condensed-v14-latin-regular.woff2') format('woff2'), 
+	url('./roboto-condensed-v14-latin-regular.woff') format('woff'); 
+}
+
+
+#result_cer {
+	font-size: 40px;
+	font-family: 'Roboto Condensed';
+}
+
+#result_cer span {
+	font-size: 30px;
+}
+
+dl dd {
+	margin-bottom: 0.5em;
+}

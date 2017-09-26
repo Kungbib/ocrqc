@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="sv">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Utvärderingsverktyg för OCR.">
+		<meta name="author" content="Kungliga biblioteket">
+		<meta name="referrer" content="no-referrer">
+		<meta http-equiv="Content-Security-Policy" content="default-src 'self' *.kb.se style-src 'self' 'unsafe-inline'">
+		<title>OCR-utvärdering - Kungliga biblioteket</title>
+		<link href="{{ url_for('static', filename='kb-style.css') }}" rel="stylesheet">
+		<!--[if lt IE 9]>
+		<script src="{{ url_for('static', filename='html5shiv.js') }}"></script>
+		<script src="{{ url_for('static', filename='respond.min.js') }}"></script>
+		<![endif]-->
+		<link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+		<meta property="og:title" content="Testverktyg för OCR-kvalitet" />
+		<meta property="og:description" content="Testverktyg för att kontrollera resultat av olika OCR-processer." />
+		<meta property="og:image" content="{{ url_for('static', filename='ogbanner.png') }}" />
+		<meta property="og:site_name" content="OCR-kontroll" />		
+	</head>
+
+	<body>
+		<nav class="navbar navbar-inverse bg-happy-magenta" role="navigation">
+			<div class="container">
+				<div class="navbar-header">
+					<a class="navbar-brand navbar-logo" href="/"><img alt="Till startsidan" src="{{ url_for('static', filename='kb_logo_white.svg') }}" /></a>
+					<a class="navbar-brand" href="#">OCR-utvärdering (labb)</a>
+				</div>
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+					<ul class="nav navbar-nav">
+						<li>
+							<a href="/about/">Om tjänsten</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+
+		<div class="container" role="main" vocab="http://schema.org/" typeof="Service">
+
+			<div class="row">
+				<div class="col-lg-12">
+					<h1 class="page-header" property="name">OCR-utvärdering</h1>
+					{% if messages %}
+					<div class="color-box auto-color-text bg-brand-warning">
+						<ul class="flashmessages">
+							{% for message in messages %}
+							<li>{{ message }}</li>
+							{% endfor %}
+						</ul>
+					</div>
+					{% endif %}
+				</div>
+			</div>
+			<!-- /.row -->
+
+			<form action="/" method="post" class="form">
+				<div class="row">
+					<div class="col-md-12">
+						<p>Klistra in texterna som ska jämföras nedan och klicka på Utvärdera. <button type="submit" class="btn btn-primary">Utvärdera</button></p>
+					</div>
+				</div>
+				<div class="row">
+
+					<div class="col-md-4">
+						<div class="form-group">
+
+							<label for="ground_truth_text">Ground truth text</label>
+							<textarea rows="10" class="form-control" name="ground_truth_text" id="ground_truth_text">{{ request.form['ground_truth_text'] }}</textarea>
+						</div>
+
+					</div>
+
+					<div class="col-md-4">
+						<label for="ocr_text">OCR text</label>
+						<textarea rows="10" class="form-control" name="ocr_text"  id="ocr_text">{{ request.form['ocr_text'] }}</textarea>
+						{% if htmldiff %}
+						<p>Textskillnader</p>
+						<div id="diff">
+							{{ htmldiff|safe }}
+						</div>
+						{% endif %}
+					</div>
+
+					<div class="col-md-4">
+
+						<div class="panel panel-default" id="results">
+							<div class="panel-heading">
+								<h3 class="panel-title">Resultat</h3>
+							</div>
+							<div class="panel-body">
+								{% if cer is not none %}
+								<div id="result_cer">{{ ocr_precision }}<span> %</span></div>
+								<dl>
+									<dt lang="en">Character error rate (CER):</dt>
+									<dd id="vresult_cer">{{ cer }} %</dd>
+									<dt>Längd OCR-text:</dt>
+									<dd>{{ ocrlen }}</dd>
+									<dt>Längd Ground truth:</dt>
+									<dd>{{ gtlen }}</dd>
+									<dt>Levenshteinavstånd:</dt>
+									<dd id="result_levenshtein">{{ ids }}</dd>
+								</dl>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+
+				</div>
+				<!-- /.row -->
+			</form>
+
+		</div>
+		<!-- Footer -->
+
+		<footer class="footer">
+			<div class="footer-container bg-black text-white">
+				<div class="container">
+					<div class="col-md-2 text-center">
+						<img alt="" src="{{ url_for('static', filename='kb_logo_white.svg') }}" class="logo-medium" />
+					</div>
+					<div class="col-md-10">
+						<p>
+							<strong><a href="http://www.kb.se">Kungliga biblioteket</a></strong>
+							<br>
+							<span>Kontakt: <a href="mailto:labb@kb.se">labb@kb.se</a></span>
+						</p>
+					</div>
+				</div>
+			</div>
+		</footer>
+
+		<!-- /.container -->
+
+		<!-- Placed at the end of the document so the pages load faster -->
+		<script src="{{ url_for('static', filename='jquery-3.2.1.slim.min.js') }}"></script>
+		<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+
+</body></html>
